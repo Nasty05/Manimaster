@@ -1,0 +1,310 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}Изменение роли - ManiMaster{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        /* Стили для страницы изменения роли */
+        body {
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 150%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* Контейнер для формы */
+        .role-container {
+            max-width: 550px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        /* Карточка формы */
+        .role-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(155, 69, 247, 0.2);
+            border: 2px solid rgba(155, 69, 247, 0.3);
+        }
+
+        /* Заголовок */
+        .role-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .role-header h2 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #6d28d9, #9b45f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Блок с информацией о пользователе, чью роль меняем */
+        .user-info {
+            background: linear-gradient(135deg, #f0e4ff, #faf5ff);
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #9b45f7;
+        }
+
+        .user-info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(155, 69, 247, 0.2);
+        }
+
+        .user-info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .user-info-label {
+            font-weight: 600;
+            color: #6d28d9;
+            min-width: 100px;
+        }
+
+        .user-info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Бейдж текущей роли */
+        .current-role {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-weight: 600;
+            background: {% if target_user.role == 'admin' %}#f3e5f5{% elif target_user.role == 'master' %}
+                #fff3e0{% else %}#e3f2fd{% endif %};
+            color: {% if target_user.role == 'admin' %}#7b1fa2{% elif target_user.role == 'master' %}#f57c00{% else %}
+                #1976d2{% endif %};
+        }
+
+        /* Стили полей формы */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #6d28d9;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #e0d0ff;
+            border-radius: 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #faf5ff;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #9b45f7;
+            box-shadow: 0 0 0 4px rgba(155, 69, 247, 0.2);
+            background: white;
+        }
+
+        /* Подсказка описание ролей */
+        .role-description {
+            background: #f0e4ff;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .role-description i {
+            color: #9b45f7;
+            margin-right: 8px;
+        }
+
+        /* Кнопки сохранить и отмена */
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 35px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 0;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9b45f7, #6d28d9);
+            color: white;
+            box-shadow: 0 5px 15px rgba(155, 69, 247, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 69, 247, 0.6);
+        }
+
+        .btn-secondary {
+            background: #f0e4ff;
+            color: #6d28d9;
+            border: 2px solid #9b45f7;
+        }
+
+        .btn-secondary:hover {
+            background: #9b45f7;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Сообщения */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeeba;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 768px) {
+            .role-card {
+                padding: 30px 20px;
+            }
+
+            .role-header h2 {
+                font-size: 2rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .user-info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .user-info-label {
+                min-width: auto;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {# Контейнер #}
+    <div class="role-container">
+        <div class="role-card">
+            {# Заголовок страницы #}
+            <div class="role-header">
+                <h2>🔄 Изменение роли</h2>
+            </div>
+
+            {# Вывод системных сообщений #}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas {% if message.tags == 'warning' %}fa-exclamation-triangle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {# Блок с информацией о пользователе #}
+            <div class="user-info">
+                <div class="user-info-item">
+                    <span class="user-info-label">Пользователь:</span>
+                    <span class="user-info-value">{{ target_user.username }}</span>
+                </div>
+                <div class="user-info-item">
+                    <span class="user-info-label">Имя:</span>
+                    <span class="user-info-value">{{ target_user.name|default:"—" }} {{ target_user.surname|default:"" }}</span>
+                </div>
+                <div class="user-info-item">
+                    <span class="user-info-label">Email:</span>
+                    <span class="user-info-value">{{ target_user.email }}</span>
+                </div>
+                <div class="user-info-item">
+                    <span class="user-info-label">Текущая роль:</span>
+                    <span class="user-info-value">
+                        <span class="current-role">{{ target_user.get_role_display }}</span>
+                    </span>
+                </div>
+            </div>
+
+            {# Форма изменения роли #}
+            <form method="POST">
+                {% csrf_token %}
+
+                {# Поле выбора роли #}
+                <div class="form-group">
+                    <label for="{{ form.role.id_for_label }}">Новая роль</label>
+                    {{ form.role }}
+                </div>
+
+                {# Пояснение, что даёт каждая роль #}
+                <div class="role-description">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Клиент</strong> - может записываться на услуги и оставлять отзывы<br>
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Мастер</strong> - имеет доступ к панели мастера и управлению записями<br>
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Администратор</strong> - полный доступ к управлению пользователями и настройкам
+                </div>
+
+                {# Кнопки сохранить и отмена #}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                    <a href="{% url 'mainapp:admin_panel' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

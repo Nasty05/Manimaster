@@ -1,0 +1,708 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}Наши услуги{% endblock %}
+
+{% block extra_styles %}
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto&family=Playfair+Display:wght@700;900&family=Lora&family=Raleway:wght@800&display=swap"
+          rel="stylesheet">
+    <style>
+        /* Общие стили для страницы услуг */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 90%);
+            background-attachment: fixed;
+            color: #fff;
+            margin: 0;
+            padding: 40px 0 0 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            color: #fff;
+        }
+
+        /* Сетка карточек услуг */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        /* Карточка одной услуги */
+        .service-card {
+            border-radius: 15px;
+            padding: 25px;
+            width: calc(33.333% - 25px);
+            min-width: 300px;
+            flex: 1 1 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Чередование градиентов для карточек */
+        .service-card:nth-child(odd) {
+            background: linear-gradient(145deg, #8e6ad9, #b284f7);
+        }
+
+        .service-card:nth-child(even) {
+            background: linear-gradient(145deg, #6a4d9e, #9d7ed6);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .service-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .service-price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .service-description {
+            flex-grow: 1;
+            font-size: 1rem;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .btn-book {
+            background: #fff;
+            color: #6a4d9e;
+            font-weight: 700;
+            text-align: center;
+            padding: 12px 0;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-book:hover {
+            background: #6a4d9e;
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(155, 69, 247, 0.5);
+        }
+
+        /* форма записи */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 90%);
+            background-attachment: fixed;
+        }
+
+        .modal-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #bookingForm {
+            background: #ffffffcc;
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            max-width: 550px;
+            width: 90%;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 2px 12px rgba(155, 69, 247, 0.15), 0 8px 36px rgba(81, 42, 122, 0.25);
+            border: 2px solid rgba(155, 69, 247, 0.2);
+            font-family: 'Lora', serif;
+            color: #333;
+            margin: 3rem auto;
+        }
+
+        #bookingForm h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 2.8rem;
+            color: #6e38a6;
+            margin-bottom: 2rem;
+            letter-spacing: -1.2px;
+            text-align: center;
+            text-shadow: 0 3px 10px rgba(155, 69, 247, 0.2);
+        }
+
+        /* Единый стиль для полей ввода и выпадающих списков */
+        #bookingForm select,
+        #bookingForm input {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 2px solid #c9b6ff;
+            font-size: 1rem;
+            font-family: 'Segoe UI', sans-serif;
+            transition: all 0.3s ease;
+            color: #4a2f90;
+            background: #f4efff;
+            box-shadow: inset 0 2px 6px rgba(157, 97, 255, 0.14);
+            margin-bottom: 18px;
+            box-sizing: border-box;
+        }
+
+        /* Эффект при фокусе */
+        #bookingForm select:focus,
+        #bookingForm input:focus {
+            outline: none;
+            border-color: #6f48ff;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(111, 72, 255, 0.5);
+        }
+
+        #bookingForm select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a2f90'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Стили для календаря */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5);
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+        /* Контейнер для кнопок формы */
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        /* Кнопка отправки */
+        #bookingForm button[type="submit"] {
+            flex: 2;
+            background: linear-gradient(135deg, #6f48ff, #9b45f7);
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            padding: 14px 0;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 1px;
+            font-family: 'Raleway', sans-serif;
+            box-shadow: 0 6px 20px rgba(155, 69, 247, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        #bookingForm button[type="submit"]:hover:not(:disabled) {
+            background: linear-gradient(145deg, #8d5cff, #bb77ff);
+            box-shadow: 0 12px 30px rgba(185, 95, 255, 0.8);
+            transform: translateY(-3px);
+        }
+
+        #bookingForm button[type="submit"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Кнопка отмены */
+        .modal-close-btn {
+            flex: 1;
+            background: #f4efff;
+            color: #6f48ff;
+            font-weight: 800;
+            font-size: 1.2rem;
+            padding: 14px 0;
+            border-radius: 50px;
+            border: 2px solid #9b45f7;
+            cursor: pointer;
+            font-family: 'Raleway', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            background: linear-gradient(145deg, #8d5cff, #bb77ff);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(185, 95, 255, 0.8);
+        }
+
+        /* Анимация появления формы */
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal {
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        /* Сообщение об успешной записи */
+        .success-message {
+            background: #ffffffcc;
+            backdrop-filter: blur(10px);
+            color: #6e38a6;
+            padding: 20px;
+            border-radius: 28px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 2px 12px rgba(155, 69, 247, 0.15), 0 8px 36px rgba(81, 42, 122, 0.25);
+            margin: 0 auto 30px auto;
+            border: 2px solid rgba(155, 69, 247, 0.2);
+            max-width: calc(100% - 40px);
+            width: fit-content;
+            min-width: 300px;
+            font-family: 'Lora', serif;
+        }
+
+        /* Адаптивность для планшетов и телефонов */
+        @media (max-width: 1024px) {
+            .service-card {
+                width: calc(50% - 25px);
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .service-card {
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .row {
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .success-message {
+                width: 90%;
+                min-width: auto;
+                padding: 15px;
+            }
+
+            #bookingForm h2 {
+                font-size: 2.2rem;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .service-card {
+                padding: 20px;
+            }
+
+            .service-title {
+                font-size: 1.3rem;
+            }
+
+            #bookingForm {
+                padding: 2rem 1.5rem;
+            }
+
+            #bookingForm h2 {
+                font-size: 1.8rem;
+            }
+
+            .error-message {
+                color: #dc3545;
+                font-size: 0.9rem;
+                margin-top: 5px;
+            }
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <main class="container">
+        <h1>Наши услуги</h1>
+
+        {# Сообщение при удачной записи #}
+        {% if success %}
+            <div class="success-message">
+                ✓ Спасибо! Ваша заявка успешно отправлена.
+            </div>
+        {% endif %}
+
+        <div class="row">
+            {# Перебираем все услуги #}
+            {% for service in services %}
+                <div class="service-card">
+                    <h3 class="service-title">{{ service.title }}</h3>
+                    <p class="service-price"><strong>Цена:</strong> {{ service.price }} ₽</p>
+                    <p class="service-description">{{ service.description }}</p>
+                    {# Кнопка "Записаться" – открывает форму #}
+                    <button type="button" class="btn-book"
+                            onclick="openModal('{{ service.id }}', '{{ service.title|escapejs }}')">
+                        Записаться
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    {# Форма записи #}
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <form id="bookingForm" method="POST" action="{% url 'mainapp:services' %}">
+                {% csrf_token %}
+                <h2>Запись на услугу</h2>
+
+                {# Выбор услуги #}
+                <select name="service" id="serviceSelect" required onchange="loadMasters(this.value)">
+                    <option value="">Выберите услугу</option>
+                    {% for service in services %}
+                        <option value="{{ service.id }}" data-duration="{{ service.duration }}">
+                            {{ service.title }} — {{ service.price }} ₽ ({{ service.duration }} мин)
+                        </option>
+                    {% endfor %}
+                </select>
+
+                {# Выбор мастера #}
+                <select name="master" id="masterSelect" required disabled>
+                    <option value="">Сначала выберите услугу</option>
+                </select>
+
+                <div class="form-group">
+                    <small class="text-muted" style="display: block; margin-bottom: 5px;">
+                        <i class="fas fa-info-circle"></i> Запись возможна на ближайшие 30 дней
+                    </small>
+                    <input type="date" name="date" id="dateSelect" required disabled
+                           class="form-control"
+                           min="{{ today }}"
+                           max="{{ max_date }}">
+                </div>
+
+                {# Выбор времени после выбора мастера и даты #}
+                <select name="time" id="timeSelect" required disabled>
+                    <option value="">Сначала выберите дату</option>
+                </select>
+
+                {# Имя и телефон клиента #}
+                <input type="text" name="name" placeholder="Ваше имя" required>
+                <input type="tel" name="phone" id="id_phone_number" placeholder="+7 (999) 123-45-67" required>
+
+                <div class="form-buttons">
+                    <button type="submit" id="submitBtn" disabled>Записаться</button>
+                    <button type="button" class="modal-close-btn" onclick="closeModal()">Отмена</button>
+                </div>
+
+                {# Блок для вывода ошибок #}
+                {% if errors %}
+                    <div class="error-message">
+                        {% for error in errors %}
+                            <p><i class="fas fa-exclamation-circle"></i> {{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // глобальные переменные
+        let selectedServiceId = null;
+        let selectedMasterId = null;
+        let selectedDate = null;
+
+        // загрузка мастеров нужных для выбранной услуги
+        function loadMasters(serviceId) {
+            console.log('loadMasters вызван для услуги:', serviceId);
+            const masterSelect = document.getElementById('masterSelect');
+            const dateSelect = document.getElementById('dateSelect');
+            const timeSelect = document.getElementById('timeSelect');
+            const submitBtn = document.getElementById('submitBtn');
+
+            selectedServiceId = serviceId;
+
+            // Если услуга не выбрана то не даем ничего сделать
+            if (!serviceId) {
+                masterSelect.innerHTML = '<option value="">Сначала выберите услугу</option>';
+                masterSelect.disabled = true;
+                dateSelect.disabled = true;
+                timeSelect.disabled = true;
+                submitBtn.disabled = true;
+                return;
+            }
+
+            masterSelect.innerHTML = '<option value="">Загрузка мастеров...</option>';
+            masterSelect.disabled = true;
+            dateSelect.disabled = true;
+            timeSelect.disabled = true;
+            submitBtn.disabled = true;
+
+            fetch(`/get-masters/${serviceId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Получены мастера:', data);
+                    if (data.masters && data.masters.length > 0) {
+                        masterSelect.innerHTML = '<option value="">Выберите мастера</option>';
+                        data.masters.forEach(master => {
+                            masterSelect.innerHTML += `<option value="${master.id}">${master.name}</option>`;
+                        });
+                        masterSelect.disabled = false;
+                        dateSelect.disabled = false;      // после выбора мастера можно выбирать дату
+                    } else {
+                        masterSelect.innerHTML = '<option value="">Нет доступных мастеров</option>';
+                        masterSelect.disabled = true;
+                        dateSelect.disabled = true;
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки мастеров:', error);
+                    masterSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+                    masterSelect.disabled = true;
+                });
+        }
+
+        // свободные слоты времени
+        function loadAvailableTimes() {
+            console.log('loadAvailableTimes вызван');
+            const serviceSelect = document.getElementById('serviceSelect');
+            const masterSelect = document.getElementById('masterSelect');
+            const dateSelect = document.getElementById('dateSelect');
+            const timeSelect = document.getElementById('timeSelect');
+            const submitBtn = document.getElementById('submitBtn');
+
+            const serviceId = serviceSelect.value;
+            const masterId = masterSelect.value;
+            const selectedDate = dateSelect.value;
+
+            if (!serviceId || !masterId || !selectedDate) {
+                timeSelect.innerHTML = '<option value="">Сначала выберите дату</option>';
+                timeSelect.disabled = true;
+                submitBtn.disabled = true;
+                return;
+            }
+
+            timeSelect.innerHTML = '<option value="">Загрузка времени...</option>';
+            timeSelect.disabled = true;
+            submitBtn.disabled = true;
+
+            const url = `/get-available-slots/?master_id=${masterId}&service_id=${serviceId}&date=${selectedDate}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Получены слоты:', data);
+                    if (data.error) {
+                        timeSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+                        timeSelect.disabled = true;
+                        submitBtn.disabled = true;
+                        return;
+                    }
+                    if (data.slots && data.slots.length > 0) {
+                        const today = new Date().toISOString().split('T')[0];
+                        const currentTime = new Date();
+                        timeSelect.innerHTML = '<option value="">Выберите время</option>';
+                        data.slots.forEach(slot => {
+                            // Если сегодняшняя дата то только время которое будет
+                            if (selectedDate === today) {
+                                const [slotHour, slotMinute] = slot.split(':').map(Number);
+                                if (slotHour > currentTime.getHours() ||
+                                    (slotHour === currentTime.getHours() && slotMinute > currentTime.getMinutes() + 30)) {
+                                    timeSelect.innerHTML += `<option value="${slot}">${slot}</option>`;
+                                }
+                            } else {
+                                timeSelect.innerHTML += `<option value="${slot}">${slot}</option>`;
+                            }
+                        });
+                        if (timeSelect.options.length === 1) { // только заголовок
+                            timeSelect.innerHTML = '<option value="">Нет доступного времени</option>';
+                            timeSelect.disabled = true;
+                            submitBtn.disabled = true;
+                        } else {
+                            timeSelect.disabled = false;
+                            submitBtn.disabled = true; // кнопка активируется только после выбора времени
+                        }
+                    } else {
+                        timeSelect.innerHTML = '<option value="">Нет свободного времени</option>';
+                        timeSelect.disabled = true;
+                        submitBtn.disabled = true;
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки времени:', error);
+                    timeSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+                    timeSelect.disabled = true;
+                    submitBtn.disabled = true;
+                });
+        }
+
+        // открытие формы
+        function openModal(serviceId, serviceTitle) {
+            console.log('Открываем модальное окно для услуги:', serviceId, serviceTitle);
+            const modal = document.getElementById('bookingModal');
+            if (!modal) {
+                alert('Ошибка: модальное окно не найдено');
+                return;
+            }
+            // Устанавливаем выбранную услугу в выпадающем списке
+            const select = document.getElementById('serviceSelect');
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value == serviceId) {
+                    select.options[i].selected = true;
+                    break;
+                }
+            }
+            loadMasters(serviceId);  // подгружаем мастеров для этой услуги
+
+            // Устанавливаем ограничения для поля даты 30 дней
+            const dateInput = document.getElementById('dateSelect');
+            const today = new Date().toISOString().split('T')[0];
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 30);
+            const maxDateStr = maxDate.toISOString().split('T')[0];
+            dateInput.min = today;
+            dateInput.max = maxDateStr;
+            dateInput.value = '';
+            dateInput.disabled = true;  // станет активным после выбора мастера
+
+            // Сбрасываем поле времени
+            const timeSelect = document.getElementById('timeSelect');
+            timeSelect.innerHTML = '<option value="">Сначала выберите дату</option>';
+            timeSelect.disabled = true;
+
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';  // запрещаем прокрутку фона
+        }
+
+        // закрываем форму
+        function closeModal() {
+            const modal = document.getElementById('bookingModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                // Сброс формы к исходному состоянию
+                document.getElementById('serviceSelect').value = '';
+                document.getElementById('masterSelect').innerHTML = '<option value="">Сначала выберите услугу</option>';
+                document.getElementById('masterSelect').disabled = true;
+                document.getElementById('dateSelect').value = '';
+                document.getElementById('dateSelect').disabled = true;
+                document.getElementById('timeSelect').innerHTML = '<option value="">Сначала выберите дату</option>';
+                document.getElementById('timeSelect').disabled = true;
+                document.getElementById('submitBtn').disabled = true;
+            }
+        }
+
+        // загрузка страницы
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Страница загружена, скрипты работают');
+
+            // Устанавливаем min/max для всех полей даты
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            const today = new Date().toISOString().split('T')[0];
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 30);
+            const maxDateStr = maxDate.toISOString().split('T')[0];
+            dateInputs.forEach(input => {
+                input.min = today;
+                input.max = maxDateStr;
+            });
+
+            // Обработчик изменения мастера
+            const masterSelect = document.getElementById('masterSelect');
+            if (masterSelect) {
+                masterSelect.addEventListener('change', function () {
+                    if (this.value) loadAvailableTimes();
+                    else {
+                        const timeSelect = document.getElementById('timeSelect');
+                        timeSelect.innerHTML = '<option value="">Сначала выберите дату</option>';
+                        timeSelect.disabled = true;
+                    }
+                });
+            }
+
+            // Обработчик изменения даты
+            const dateSelect = document.getElementById('dateSelect');
+            if (dateSelect) {
+                dateSelect.addEventListener('change', function () {
+                    if (this.value) loadAvailableTimes();
+                    else {
+                        const timeSelect = document.getElementById('timeSelect');
+                        timeSelect.innerHTML = '<option value="">Сначала выберите дату</option>';
+                        timeSelect.disabled = true;
+                    }
+                });
+            }
+
+            // Обработчик выбора времени он активирует кнопку отправки
+            const timeSelect = document.getElementById('timeSelect');
+            if (timeSelect) {
+                timeSelect.addEventListener('change', function () {
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.disabled = !this.value;
+                });
+            }
+        });
+
+        // Закрытие формы при клике на тёмную подложку
+        window.onclick = function (event) {
+            const modal = document.getElementById('bookingModal');
+            if (event.target == modal) closeModal();
+        }
+    </script>
+
+    {# Для маски телефона #}
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/inputmask.js' %}"></script>
+    <script src="{% static 'js/jquery.inputmask.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $("#id_phone_number").inputmask("+7 (999)-999-99-99");
+        });
+    </script>
+{% endblock %}

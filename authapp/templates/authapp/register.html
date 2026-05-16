@@ -1,0 +1,205 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        {# Стили для страницы регистрации #}
+        .page-background {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 90%);
+        }
+
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Карточка формы */
+        .auth-wrapper {
+            background: #ffffffcc;
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            max-width: 640px;
+            width: 90%;
+            padding: 4rem 3rem 3.5rem;
+            box-shadow: 0 2px 12px rgba(155, 69, 247, 0.15),
+            0 8px 36px rgba(81, 42, 122, 0.25);
+            border: 2px solid rgba(155, 69, 247, 0.2);
+            font-family: 'Lora', serif;
+            color: #333;
+            margin: 3rem auto;
+        }
+
+        .auth-wrapper h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 3.2rem;
+            color: #6e38a6;
+            margin-bottom: 2.5rem;
+            letter-spacing: -1.2px;
+            text-align: center;
+            text-shadow: 0 3px 10px rgba(155, 69, 247, 0.2);
+        }
+
+        /* Форма */
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem 1.2rem;
+        }
+
+        /* Обёртка каждого поля */
+        .field-wrapper {
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Поля, которые должны быть на всю ширину */
+        .field-wrapper.full-width {
+            width: 100%;
+        }
+
+        label {
+            font-weight: 600;
+            color: #7b4efd;
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
+            user-select: none;
+        }
+
+        /* Стили для всех полей ввода */
+        input[type=text],
+        input[type=password],
+        input[type=email],
+        input[type=tel] {
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 2px solid #c9b6ff;
+            font-size: 1rem;
+            font-family: 'Segoe UI', sans-serif;
+            transition: all 0.3s ease;
+            color: #4a2f90;
+            background: #f4efff;
+            box-shadow: inset 0 2px 6px rgba(157, 97, 255, 0.14);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #6f48ff;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(111, 72, 255, 0.5);
+        }
+
+        /* Кнопка отправки */
+        button {
+            margin-top: 1rem;
+            background: linear-gradient(135deg, #6f48ff, #9b45f7);
+            color: white;
+            font-weight: 800;
+            font-size: 1.4rem;
+            padding: 16px 0;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 2px;
+            font-family: 'Raleway', sans-serif;
+            box-shadow: 0 6px 20px rgba(155, 69, 247, 0.5);
+            transition: all 0.3s ease;
+            user-select: none;
+            width: 100%;
+        }
+
+        button:hover {
+            background: linear-gradient(145deg, #8d5cff, #bb77ff);
+            box-shadow: 0 12px 30px rgba(185, 95, 255, 0.8);
+            transform: translateY(-3px);
+        }
+
+        /* Стили для списка ошибок валидации */
+        .errorlist {
+            color: #ff4e6a;
+            font-size: 0.92rem;
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+            user-select: none;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 480px) {
+            .auth-wrapper {
+                max-width: 90vw;
+                padding: 3rem 2rem;
+            }
+
+            .auth-wrapper h2 {
+                font-size: 2.6rem;
+            }
+
+            .field-wrapper {
+                width: 100% !important;
+            }
+
+            button {
+                font-size: 1.2rem;
+                padding: 14px 0;
+            }
+        }
+    </style>
+
+    {# Основная разметка страницы регистрации #}
+    <div class="page-background">
+        <div class="auth-wrapper">
+            <h2>Регистрация</h2>
+
+            {# Форма отправляется методом POST #}
+            <form method="post" novalidate>
+                {% csrf_token %} {# защита от CSRF #}
+
+                {# Вывод общих ошибок формы #}
+                {% if form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {# Перебирает все поля формы #}
+                {% for field in form %}
+                    {# Определяет класс обёртки #}
+                    <div class="field-wrapper {% if field.name == 'password' or field.name == 'username' or field.name == 'password1' or field.name == 'password2' %}full-width{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }} {# само поле ввода #}
+                        {% if field.errors %}
+                            <ul class="errorlist">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+        </div>
+    </div>
+
+    {# Скрипты #}
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/inputmask.js' %}"></script>
+    <script src="{% static 'js/jquery.inputmask.js' %}"></script>
+    <script>
+        // Маску ввода для поля телефона
+        $(document).ready(function () {
+            $("#id_phone_number").inputmask("+7 (999)-999-99-99");
+        });
+    </script>
+{% endblock %}

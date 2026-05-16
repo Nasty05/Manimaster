@@ -1,0 +1,432 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}Панель мастера - ManiMaster{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        /* Общий фон страницы */
+        body {
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 150%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* Контейнер основного содержимого */
+        .panel-container {
+            max-width: 1400px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        /* Приветственная секция */
+        .welcome-section {
+            background: linear-gradient(135deg, #6d28d9, #9b45f7, #ff69b4);
+            border-radius: 40px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(155, 69, 247, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .welcome-text {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 600px;
+        }
+
+        /* Сетка статистики */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(155, 69, 247, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(155, 69, 247, 0.25);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: #9b45f7;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #6d28d9;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        /* Секция с расписанием на сегодня */
+        .schedule-section {
+            background: white;
+            border-radius: 40px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(155, 69, 247, 0.15);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6d28d9;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Сетка записей на сегодня */
+        .schedule-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        /* Одна запись */
+        .schedule-item {
+            display: grid;
+            grid-template-columns: 100px 1fr 200px 100px;
+            gap: 15px;
+            padding: 15px;
+            background: #faf5ff;
+            border-radius: 15px;
+            align-items: center;
+        }
+
+        .schedule-time {
+            font-weight: 700;
+            color: #6d28d9;
+        }
+
+        .schedule-client {
+            font-weight: 600;
+        }
+
+        .schedule-service {
+            color: #666;
+        }
+
+        .schedule-status {
+            padding: 5px 10px;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Цвета статусов */
+        .status-confirmed {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-completed {
+            background: #ebe8f5;
+            color: #3f2e7d;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #dc3545;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+
+        .btn-action {
+            padding: 5px 15px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Адаптивность для планшетов */
+        @media (max-width: 1024px) {
+            .schedule-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
+        /* Сообщение, если записей нет */
+        .empty-schedule {
+            text-align: center;
+            padding: 30px;
+            background: #faf5ff;
+            border-radius: 15px;
+            color: #666;
+            width: 100%;
+        }
+
+        /* Сетка перерывов и исключений */
+        .breaks-grid, .exceptions-grid {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .break-item, .exception-item {
+            background: #faf5ff;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .break-day, .exception-date {
+            font-weight: 700;
+            color: #6d28d9;
+            min-width: 120px;
+        }
+
+        .break-time, .exception-time {
+            color: #666;
+        }
+
+        .break-reason, .exception-reason {
+            color: #999;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+
+        .exception-off {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        /* Кнопка перехода к редактированию расписания */
+        .btn-edit-schedule {
+            display: inline-block;
+            background: linear-gradient(135deg, #9b45f7, #6d28d9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit-schedule:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 69, 247, 0.4);
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="panel-container">
+        {# Приветственная секция #}
+        <div class="welcome-section">
+            <h1 class="welcome-title">👩‍🎨 Здравствуйте, {{ user.name|default:user.username }}!</h1>
+            {# Если не заполнено имя покажет логин #}
+            <p class="welcome-text">Панель управления мастера. Здесь вы видите все записи и можете управлять своим
+                расписанием.</p>
+        </div>
+
+        {# Статистика #}
+        <div class="stats-grid">
+            {# Колво записей на сегодня #}
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-number">{{ stats.today }}</div>
+                <div class="stat-label">Записей сегодня</div>
+            </div>
+            {#  Колво записей в статусе ожидает подтверждения #}
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-number">{{ stats.pending }}</div>
+                <div class="stat-label">Ожидают</div>
+            </div>
+            {# Колво выполненных заказов #}
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-number">{{ stats.total_completed }}</div>
+                <div class="stat-label">Всего выполнено</div>
+            </div>
+            {# средний рейтинг мастера #}
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-number">{{ stats.avg_rating }}</div>
+                <div class="stat-label">Средний рейтинг</div>
+            </div>
+        </div>
+
+        {# Расписание на сегодня #}
+        <div class="schedule-section">
+            <h2 class="section-title">
+                <i class="fas fa-calendar-day"></i>
+                Расписание на сегодня
+            </h2>
+            <div class="schedule-grid">
+                {# Если есть записи на сегодня #}
+                {% if today_bookings %}
+                    {% for booking in today_bookings %}
+                        <div class="schedule-item">
+                            <span class="schedule-time">{{ booking.time|time:"H:i" }}</span>
+                            <span class="schedule-client">{{ booking.name }}</span>
+                            <span class="schedule-service">{{ booking.service.title }}</span>
+                            {# Условное отображение статуса #}
+                            <span class="schedule-status
+                                {% if booking.status == 'confirmed' %}status-confirmed
+                                {% elif booking.status == 'completed' %}status-completed
+                                {% elif booking.status == 'cancelled' %}status-cancelled
+                                {% else %}status-pending{% endif %}">
+                                {{ booking.get_status_display }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    {# Если нет записи сообщение #}
+                    <div class="empty-schedule">
+                        <p>На сегодня записей нет</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Регулярные перерывы #}
+        {% if weekly_time_offs %}
+            <div class="schedule-section">
+                <h2 class="section-title">
+                    <i class="fas fa-coffee"></i>
+                    Мои регулярные перерывы
+                </h2>
+                <div class="breaks-grid">
+                    {% for timeoff in weekly_time_offs %}
+                        <div class="break-item">
+                            {# Возвращает название дня недели #}
+                            <span class="break-day">{{ timeoff.get_day_of_week_display }}</span>
+                            <span class="break-time">{{ timeoff.start_time|time:"H:i" }} - {{ timeoff.end_time|time:"H:i" }}</span>
+                            <span class="break-reason">{{ timeoff.reason }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                {# Ссылка на страницу управления расписанием #}
+                <a href="{% url 'mainapp:master_schedule' %}" class="btn-edit-schedule">
+                    <i class="fas fa-edit"></i> Управлять расписанием
+                </a>
+            </div>
+        {% endif %}
+
+        {# Статистика за месяц с графиком #}
+        <div class="schedule-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line"></i>
+                Статистика за месяц
+            </h2>
+            <div style="height: 300px; display: flex; align-items: center; justify-content: center; background: #faf5ff; border-radius: 20px; position: relative;">
+                {% if chart_data and chart_labels %}
+                    <canvas id="bookingChart" width="400" height="200"></canvas>
+                {% else %}
+                    <p style="color: #9b45f7;">Нет данных за последние 30 дней</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Исключения в расписании #}
+        {% if exceptions %}
+            <div class="schedule-section">
+                <h2 class="section-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Исключения в расписании
+                </h2>
+                <div class="exceptions-grid">
+                    {% for exception in exceptions %}
+                        <div class="exception-item">
+                            <span class="exception-date">{{ exception.date|date:"d.m.Y" }}</span>
+                            {# сли мастер работает показываем время #}
+                            {% if exception.is_working %}
+                                <span class="exception-time">{{ exception.start_time|time:"H:i" }} - {{ exception.end_time|time:"H:i" }}</span>
+                            {% else %}
+                                <span class="exception-off">❌ НЕ РАБОТАЕТ</span>
+                            {% endif %}
+                            {% if exception.reason %}
+                                <span class="exception-reason">{{ exception.reason }}</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    {# Добавляем Chart.js для графика #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% if chart_data and chart_labels %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // получает контекст
+                const ctx = document.getElementById('bookingChart').getContext('2d');
+                // Создает линейный график
+                new Chart(ctx, {
+                    type: 'line', // линейный тип графика
+                    data: {
+                        labels: {{ chart_labels|safe }}, //подписи по оси Х
+                        datasets: [{
+                            label: 'Количество записей',
+                            data: {{ chart_data|safe }}, //данные по оси У
+                            borderColor: '#9b45f7',
+                            backgroundColor: 'rgba(155, 69, 247, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true, // Адоптивность
+                        maintainAspectRatio: false, // не сохранять пропорции
+                        plugins: {
+                            legend: {
+                                display: false // скрыть легенду
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true, // начинать ось У с нуля
+                                ticks: {
+                                    stepSize: 1 // шаг 1
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    {% endif %}
+{% endblock %}

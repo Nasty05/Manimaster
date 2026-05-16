@@ -1,0 +1,476 @@
+{% load static %}  {# загружаем теги для работы со статическими файлами #}
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap"
+          rel="stylesheet"/>
+
+    <style>
+        /*  Стили навигации */
+        .navbar {
+            background: linear-gradient(135deg, #5a2d9c 0%, #8a4fff 50%, #b47aff 100%) !important;
+            box-shadow: 0 10px 30px rgba(90, 45, 156, 0.3);
+            padding: 0.8rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Логотип */
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.6rem !important;
+            font-weight: 700 !important;
+            font-family: 'Montserrat', sans-serif !important;
+            padding: 0.5rem 1.2rem !important;
+            color: white !important;
+            background: linear-gradient(135deg, rgba(180, 130, 255, 0.3), rgba(220, 190, 255, 0.3));
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-brand:hover {
+            background: rgba(255, 230, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Иконка */
+        .navbar-brand img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            background: rgba(230, 200, 255, 0.9);
+            border-radius: 12px;
+            padding: 6px;
+            box-shadow: 0 4px 10px rgba(106, 77, 158, 0.3);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .navbar-brand:hover img {
+            transform: scale(1.1) rotate(8deg);
+            background: rgba(240, 210, 255, 1);
+            box-shadow: 0 8px 20px rgba(106, 77, 158, 0.5);
+        }
+
+        /* Текст логотипа */
+        .navbar-brand span {
+            color: white !important;
+            font-weight: 700 !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover span {
+            transform: translateX(3px);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Адаптивность логотипа на мобильных */
+        @media (max-width: 991.98px) {
+            .navbar-brand {
+                font-size: 1.3rem !important;
+                padding: 0.3rem 1rem !important;
+            }
+
+            .navbar-brand img {
+                width: 36px;
+                height: 36px;
+                padding: 5px;
+            }
+
+            .navbar-brand:hover img {
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+
+        /* Ссылки меню */
+        .navbar-nav {
+            gap: 0.5rem;
+        }
+
+        .navbar-nav .nav-link {
+            font-family: 'Montserrat', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 1.1rem !important;
+            padding: 0.7rem 1.2rem !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            position: relative;
+            letter-spacing: 0.3px;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Активная ссылка */
+        .navbar-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .navbar-nav .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: white;
+            border-radius: 3px;
+            box-shadow: 0 0 10px white;
+        }
+
+        .nav-link i {
+            margin-right: 6px;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Особая кнопка */
+        .nav-link.special {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-left: 0.5rem;
+        }
+
+        .nav-link.special:hover {
+            background: white;
+            color: #5a2d9c !important;
+        }
+
+        /* Кнопка для мобильных */
+        .navbar-toggler {
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar-toggler:hover {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .navbar-toggler-icon {
+            width: 24px;
+            height: 24px;
+            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,0.9)' stroke-width='2.5' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22' /%3E%3C/svg%3E");
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler:hover .navbar-toggler-icon {
+            filter: drop-shadow(0 0 5px white);
+        }
+
+        /* Выпадающее меню */
+        .dropdown-menu {
+            background: white !important;
+            border: 2px solid #9b45f7 !important;
+            border-radius: 20px !important;
+            padding: 10px 0 !important;
+            box-shadow: 0 15px 35px rgba(155, 69, 247, 0.3) !important;
+            margin-top: 15px !important;
+            animation: dropdownFade 0.3s ease;
+        }
+
+        @keyframes dropdownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            color: #2d2d2d !important;
+            padding: 12px 25px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item i {
+            color: #9b45f7;
+            width: 25px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #f0e4ff, #faf5ff) !important;
+            color: #6d28d9 !important;
+            padding-left: 30px !important;
+        }
+
+        .dropdown-divider {
+            border-top: 2px solid #f0e4ff !important;
+            margin: 8px 25px !important;
+        }
+
+        /* Бейдж роли пользователя */
+        .navbar .badge {
+            background: linear-gradient(135deg, #ff69b4, #9b45f7) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 4px 10px !important;
+            border-radius: 50px !important;
+            margin-left: 8px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-toggle::after {
+            color: white;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* Декоративный элемент поверх навбара */
+        .navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Основной контент страницы */
+        main {
+            padding-top: 80px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Адаптивные стили для мобильных */
+        @media (max-width: 991.98px) {
+            .navbar {
+                padding: 0.6rem 1rem;
+            }
+
+            .navbar-nav {
+                gap: 0.2rem;
+                padding: 1rem 0;
+            }
+
+            .navbar-nav .nav-link {
+                font-size: 1rem !important;
+                padding: 0.6rem 1rem !important;
+                border-radius: 30px;
+            }
+
+            .navbar-nav .nav-link.active::after {
+                display: none;
+            }
+
+            /* На мобильных выпадающее меню становится прозрачным на тёмном фоне */
+            .dropdown-menu {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .dropdown-item {
+                color: white !important;
+                padding: 12px 25px !important;
+            }
+
+            .dropdown-item i {
+                color: white;
+                opacity: 0.9;
+            }
+
+            .dropdown-item:hover {
+                background: rgba(255, 255, 255, 0.15) !important;
+                color: white !important;
+            }
+
+            .dropdown-divider {
+                border-top-color: rgba(255, 255, 255, 0.2) !important;
+                margin: 8px 0 !important;
+            }
+
+            .navbar .badge {
+                background: rgba(255, 255, 255, 0.3) !important;
+            }
+        }
+    </style>
+
+    {# Дополнительный пользовательский CSS #}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+
+    <title>{{ title|capfirst }}</title> {# заголовок страницы, переданный из представления #}
+</head>
+
+<body>
+{# Навигация #}
+<nav class="navbar navbar-expand-lg fixed-top" aria-label="Основная навигация">
+    <div class="container-fluid">
+        {# Логотип #}
+        <a class="navbar-brand" href="{% url 'mainapp:index' %}">
+            <img src="{% static 'img/icons8-ноготь-64.png' %}" alt="Логотип ManiMaster" loading="lazy"/>
+            <span>ManiMaster</span>
+        </a>
+
+        {# Кнопка для сворачивания меню на мобильных #}
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключить меню">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        {# Сворачиваемое меню #}
+        <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                {# Главная #}
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}"
+                       aria-current="page" href="{% url 'mainapp:index' %}">
+                        <i class="fas fa-home"></i> Главная
+                    </a>
+                </li>
+
+                {# Работы #}
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'portfolio' %}active{% endif %}"
+                       href="{% url 'mainapp:portfolio' %}">
+                        <i class="fas fa-images"></i> Работы
+                    </a>
+                </li>
+
+                {# Если пользователь авторизован – показываем дополнительные ссылки #}
+                {% if user.is_authenticated %}
+                    {# Услуги #}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}"
+                           href="{% url 'mainapp:services' %}">
+                            <i class="fas fa-cut"></i> Услуги
+                        </a>
+                    </li>
+
+                    {# Выпадающее меню с именем пользователя и бейджем роли #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i> {{ user.username }}
+                            <span class="badge">
+                                {% if user.is_superuser %}Админ
+                                {% elif user.role == 'master' %}Мастер
+                                {% elif user.role == 'admin' %}Администратор
+                                {% else %}Клиент{% endif %}
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            {# Ссылка на профиль #}
+                            <li><a class="dropdown-item" href="{% url 'mainapp:profile' %}"><i
+                                    class="fas fa-id-card"></i> Мой профиль</a></li>
+
+                            {# Панель мастера #}
+                            {% if user.role == 'master' or user.is_superuser or user.role == 'admin' %}
+                                <li><a class="dropdown-item" href="{% url 'mainapp:master_panel' %}"><i
+                                        class="fas fa-tools"></i> Панель мастера</a></li>
+                                <li><a class="dropdown-item" href="{% url 'mainapp:master_schedule' %}"><i
+                                        class="fas fa-calendar-alt"></i> Моё расписание</a></li>
+                            {% endif %}
+
+                            {# Панель администратора #}
+                            {% if user.is_superuser or user.role == 'admin' %}
+                                <li><a class="dropdown-item" href="{% url 'mainapp:admin_panel' %}"><i
+                                        class="fas fa-users-cog"></i> Управление пользователями</a></li>
+                            {% endif %}
+
+                            {# Ссылка на Django-админку #}
+                            {% if user.is_staff or user.is_superuser %}
+                                <li><a class="dropdown-item" href="{% url 'admin:index' %}" target="_blank"><i
+                                        class="fas fa-cog"></i> Django Admin</a></li>
+                            {% endif %}
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            {# Выход из системы #}
+                            <li><a class="dropdown-item" href="{% url 'authapp:logout' %}"><i
+                                    class="fas fa-sign-out-alt"></i> Выйти</a></li>
+                        </ul>
+                    </li>
+
+                {% else %}
+                    {# Для неавторизованных пользователей #}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'authapp:login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link special" href="{% url 'authapp:register' %}">
+                            <i class="fas fa-user-plus"></i> Регистрация
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{# Основной блок контента #}
+<main>
+    {% block extra_styles %}{% endblock %}
+    {% block content %}{% endblock %}
+</main>
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+{# Скрипт #}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 50) {
+                navbar.style.background = 'linear-gradient(135deg, #4a1d8c 0%, #7a3fff 50%, #a46aff 100%)';
+                navbar.style.boxShadow = '0 5px 20px rgba(0,0,0,0.3)';
+            } else {
+                navbar.style.background = 'linear-gradient(135deg, #5a2d9c 0%, #8a4fff 50%, #b47aff 100%)';
+                navbar.style.boxShadow = '0 10px 30px rgba(90, 45, 156, 0.3)';
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}Оставить отзыв - ManiMaster{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        /* Общий фон страницы */
+        body {
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 150%);
+            background-attachment: fixed;
+        }
+
+        /* Контейнер для всего содержимого */
+        .review-container {
+            max-width: 800px;
+            margin: 100px auto 40px;
+            padding: 0 20px;
+        }
+
+        /* Заголовок страницы */
+        .review-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .review-header h1 {
+            font-size: 2.5rem;
+            color: #6d28d9;
+            margin-bottom: 10px;
+        }
+
+        .review-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Блок с информацией о записи */
+        .booking-info {
+            background: linear-gradient(135deg, #f5f0ff, #faf5ff);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 2px solid #9b45f7;
+        }
+
+        .booking-info h3 {
+            color: #6d28d9;
+            margin-bottom: 10px;
+        }
+
+        /* Секция с оценками по категориям */
+        .rating-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(106, 77, 158, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .rating-category {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0e4ff;
+        }
+
+        .rating-category:last-child {
+            border-bottom: none;
+        }
+
+        .category-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #6d28d9;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-label i {
+            color: #9b45f7;
+        }
+
+        /* Стили для звёзд */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Эффекты при наведении и выборе */
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffb700;
+            transform: scale(1.1);
+        }
+
+        /* Секция что понравилось больше всего */
+        .likes-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .likes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .likes-item {
+            background: #f5f0ff;
+            border-radius: 50px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .likes-item:hover {
+            background: #9b45f7;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .likes-item input {
+            display: none;
+        }
+
+        .likes-item input:checked + label {
+            background: #9b45f7;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+        }
+
+        .likes-item label {
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Текстовый отзыв */
+        .comment-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .comment-section textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #f0e4ff;
+            border-radius: 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        .comment-section textarea:focus {
+            border-color: #9b45f7;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(155, 69, 247, 0.1);
+        }
+
+        /* Кнопка отправки */
+        .submit-btn {
+            background: linear-gradient(135deg, #9b45f7, #6d28d9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 69, 247, 0.3);
+        }
+
+        /* Анимация звёзд при выборе */
+        @keyframes starPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .star-rating input:checked + label {
+            animation: starPulse 0.3s ease;
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 768px) {
+            .review-header h1 {
+                font-size: 2rem;
+            }
+
+            .likes-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {# Основной контейнер формы #}
+    <div class="review-container">
+        {# Заголовок #}
+        <div class="review-header">
+            <h1>🌟 Оставьте отзыв</h1>
+            <p>Ваше мнение помогает нам становиться лучше!</p>
+        </div>
+
+        {# Информация о записи, на которую оставляется отзыв #}
+        <div class="booking-info">
+            <h3>{{ booking.service.title }}</h3>
+            <p><i class="fas fa-calendar"></i> {{ booking.date|date:"d.m.Y" }} в {{ booking.time|time:"H:i" }}</p>
+        </div>
+
+        {# Форма отправляется методом POST #}
+        <form method="POST">
+            {% csrf_token %}
+
+            {# Секция с рейтингом по категориям #}
+            <div class="rating-section">
+                <h2 style="color: #6d28d9; margin-bottom: 20px;">Оцените по категориям</h2>
+
+                {# Скорость работы #}
+                <div class="rating-category">
+                    <div class="category-label"><i class="fas fa-rocket"></i> Скорость работы</div>
+                    <div class="star-rating">
+                        {# Перебираем цифры от 5 до 1 #}
+                        {% for i in "54321" %}
+                            <input type="radio" name="speed_rating" value="{{ i }}" id="speed{{ i }}" required>
+                            <label for="speed{{ i }}">★</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Качество работы #}
+                <div class="rating-category">
+                    <div class="category-label"><i class="fas fa-gem"></i> Качество работы</div>
+                    <div class="star-rating">
+                        {% for i in "54321" %}
+                            <input type="radio" name="quality_rating" value="{{ i }}" id="quality{{ i }}" required>
+                            <label for="quality{{ i }}">★</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Дизайн #}
+                <div class="rating-category">
+                    <div class="category-label"><i class="fas fa-paint-brush"></i> Дизайн</div>
+                    <div class="star-rating">
+                        {% for i in "54321" %}
+                            <input type="radio" name="design_rating" value="{{ i }}" id="design{{ i }}" required>
+                            <label for="design{{ i }}">★</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Чистота и стерильность #}
+                <div class="rating-category">
+                    <div class="category-label"><i class="fas fa-hand-sparkles"></i> Чистота и стерильность</div>
+                    <div class="star-rating">
+                        {% for i in "54321" %}
+                            <input type="radio" name="cleanliness_rating" value="{{ i }}" id="cleanliness{{ i }}"
+                                   required>
+                            <label for="cleanliness{{ i }}">★</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Соотношение цены и качества #}
+                <div class="rating-category">
+                    <div class="category-label"><i class="fas fa-coins"></i> Соотношение цены и качества</div>
+                    <div class="star-rating">
+                        {% for i in "54321" %}
+                            <input type="radio" name="price_rating" value="{{ i }}" id="price{{ i }}" required>
+                            <label for="price{{ i }}">★</label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {# Секция что понравилось #}
+            <div class="likes-section">
+                <h2 style="color: #6d28d9; margin-bottom: 20px;">✨ Что понравилось больше всего?</h2>
+                <p style="color: #666; margin-bottom: 20px;">Можно выбрать несколько вариантов</p>
+                <div class="likes-grid">
+                    {# Чекбокс с лейблом #}
+                    <div class="likes-item">
+                        <input type="checkbox" name="likes" value="speed" id="like_speed">
+                        <label for="like_speed">⚡ Скорость</label>
+                    </div>
+                    <div class="likes-item">
+                        <input type="checkbox" name="likes" value="quality" id="like_quality">
+                        <label for="like_quality">💎 Качество</label>
+                    </div>
+                    <div class="likes-item">
+                        <input type="checkbox" name="likes" value="design" id="like_design">
+                        <label for="like_design">🎨 Дизайн</label>
+                    </div>
+                    <div class="likes-item">
+                        <input type="checkbox" name="likes" value="cleanliness" id="like_cleanliness">
+                        <label for="like_cleanliness">🧼 Чистота</label>
+                    </div>
+                    <div class="likes-item">
+                        <input type="checkbox" name="likes" value="price" id="like_price">
+                        <label for="like_price">💰 Цена</label>
+                    </div>
+                    <div class="likes-item">
+                        <input type="checkbox" name="likes" value="master" id="like_master">
+                        <label for="like_master">👩‍🎨 Мастер</label>
+                    </div>
+                    <div class="likes-item">
+                        <input type="checkbox" name="likes" value="atmosphere" id="like_atmosphere">
+                        <label for="like_atmosphere">✨ Атмосфера</label>
+                    </div>
+                </div>
+            </div>
+
+            {# Текстовый комментарий #}
+            <div class="comment-section">
+                <h2 style="color: #6d28d9; margin-bottom: 20px;">💬 Ваш отзыв</h2>
+                <textarea name="comment" placeholder="Поделитесь впечатлениями..."></textarea>
+            </div>
+
+            {# Кнопка отправки #}
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-paper-plane"></i> Отправить отзыв
+            </button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'mainapp/base.html' %}
+{% block content %}
+    <style>
+        /* Стили для страницы входа */
+        .auth-wrapper {
+            background: #ffffffcc;
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            max-width: 420px;
+            width: 100%;
+            padding: 3.5rem 2.5rem 3rem;
+            box-shadow: 0 2px 12px rgba(155, 69, 247, 0.15),
+            0 8px 36px rgba(81, 42, 122, 0.25);
+            border: 2px solid rgba(155, 69, 247, 0.2);
+            font-family: 'Lora', serif;
+            color: #333;
+            margin: 4rem auto;
+        }
+
+        /* Фон всей страницы */
+        .page-background {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 90%);
+        }
+
+        .auth-wrapper h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 3.2rem;
+            color: #6e38a6;
+            margin-bottom: 2.5rem;
+            letter-spacing: -1.2px;
+            text-align: center;
+            text-shadow: 0 3px 10px rgba(155, 69, 247, 0.2);
+        }
+
+        .auth-wrapper form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.9rem;
+        }
+
+        .auth-wrapper label {
+            font-weight: 600;
+            color: #7b4efd;
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
+            user-select: none;
+        }
+
+        /* Стили для полей ввода */
+        .auth-wrapper input[type="text"],
+        .auth-wrapper input[type="password"],
+        .auth-wrapper input[type="email"] {
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 2px solid #c9b6ff;
+            font-size: 1rem;
+            font-family: 'Segoe UI', sans-serif;
+            transition: all 0.3s ease;
+            color: #4a2f90;
+            background: #f4efff;
+            box-shadow: inset 0 2px 6px rgba(157, 97, 255, 0.14);
+        }
+
+        .auth-wrapper input:focus {
+            outline: none;
+            border-color: #6f48ff;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(111, 72, 255, 0.5);
+        }
+
+        /* Кнопка входа */
+        .auth-wrapper button {
+            margin-top: 1rem;
+            background: linear-gradient(135deg, #6f48ff, #9b45f7);
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.4rem;
+            padding: 16px 0;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 2px;
+            font-family: 'Raleway', sans-serif;
+            box-shadow: 0 6px 20px rgba(155, 69, 247, 0.5);
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .auth-wrapper button:hover {
+            background: linear-gradient(145deg, #8d5cff, #bb77ff);
+            box-shadow: 0 12px 30px rgba(185, 95, 255, 0.8);
+            transform: translateY(-3px);
+        }
+
+        /* Ошибки формы */
+        .auth-wrapper .errorlist {
+            color: #ff4e6a;
+            font-size: 0.92rem;
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+            user-select: none;
+        }
+
+        /* Ссылка на регистрацию */
+        .auth-wrapper .auth-footer {
+            margin-top: 2rem;
+            font-size: 1.1rem;
+            text-align: center;
+            color: #5f4bd8;
+            font-family: 'Lora', serif;
+            user-select: none;
+        }
+
+        .auth-wrapper .auth-footer a {
+            color: #bb77ff;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        .auth-wrapper .auth-footer a:hover {
+            color: #4a28ff;
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 480px) {
+            .auth-wrapper h2 {
+                font-size: 2.6rem;
+            }
+
+            .auth-wrapper {
+                padding: 2.5rem 1.5rem 2rem;
+            }
+
+            .auth-wrapper button {
+                font-size: 1.2rem;
+                padding: 14px 0;
+            }
+        }
+    </style>
+
+    {# Блок с формой #}
+    <div class="page-background">
+        <div class="auth-wrapper">
+            <h2>Вход в аккаунт</h2>
+
+            {# Форма входа #}
+            <form method="post" novalidate>
+                {% csrf_token %} {# Защита от CSRF-атак #}
+
+                {# Вывод общих ошибок формы #}
+                {% if form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {# Перебирает поля формы #}
+                {% for field in form %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}   {# само поле ввода #}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endfor %}
+
+                <button type="submit">Войти</button>
+            </form>
+
+            {# Ссылка на страницу регистрации #}
+            <div class="auth-footer">
+                Нет аккаунта? <a href="{% url 'authapp:register' %}">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,662 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}Мой профиль - ManiMaster{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        /* Общий фон страницы */
+        body {
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 150%);
+        }
+
+        /* Шапка профиля */
+        .profile-header {
+            background: linear-gradient(135deg, #5a2d9c 0%, #8a4fff 50%, #b47aff 100%) !important;
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            border-radius: 0 0 50px 50px;
+            box-shadow: 0 10px 30px rgba(106, 77, 158, 0.3);
+        }
+
+        /* Имя пользователя в шапке */
+        .profile-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        /* Статистика */
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Основное содержимое */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Заголовки разделов */
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 40px 0 20px;
+            color: #6d28d9;
+            border-left: 5px solid #9b45f7;
+            padding-left: 15px;
+        }
+
+        /* Сетка карточек записей */
+        .bookings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Карточка одной записи */
+        .booking-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(106, 77, 158, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(106, 77, 158, 0.2);
+            border-color: #9b45f7;
+        }
+
+        /* Предстоящие записи */
+        .booking-card.upcoming {
+            border-left: 5px solid #9b45f7;
+        }
+
+        /* Прошедшие записи */
+        .booking-card.past {
+            border-left: 5px solid #534b78;
+            opacity: 0.8;
+        }
+
+        .booking-service {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #6d28d9;
+            margin-bottom: 10px;
+        }
+
+        .booking-details {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .booking-details i {
+            color: #9b45f7;
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .booking-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-upcoming {
+            background: #f0e8f5;
+            color: #9b45f7;
+        }
+
+        .status-past {
+            background: #f5f5f5;
+            color: #9e9e9e;
+        }
+
+        .booking-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Кнопка отмены записи */
+        .btn-cancel {
+            background: #7f6bff;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-cancel:hover {
+            background: #7752ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(145, 82, 255, 0.3);
+        }
+
+        .btn-cancel:active {
+            transform: translateY(0);
+        }
+
+        /* Состояние, когда список записей пуст */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #faf5ff;
+            border-radius: 30px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #9b45f7;
+            margin-bottom: 20px;
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Основная кнопка */
+        .btn-primary {
+            background: linear-gradient(135deg, #9b45f7, #6d28d9);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 69, 247, 0.3);
+        }
+
+        /* Адаптивность для планшетов и телефонов */
+        @media (max-width: 768px) {
+            .profile-name {
+                font-size: 2rem;
+            }
+
+            .profile-stats {
+                gap: 20px;
+            }
+
+            .bookings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Контейнер для всплывающих сообщений */
+        .messages-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d9d4ed, #ccc3e6);
+            color: #2b1557;
+            border: 2px solid #5228a7;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #e0d7f8, #d7c6f5);
+            color: #2f1c72;
+            border: 2px solid #7835dc;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #decdff, #d1baff);
+            color: #2f0485;
+            border: 2px solid #5a07ff;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .btn-close {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Форма подтверждения отмены записи */
+        .cancel-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .cancel-modal-content {
+            background: white;
+            border-radius: 30px;
+            max-width: 450px;
+            width: 90%;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(106, 77, 158, 0.4);
+            animation: slideUp 0.3s ease;
+            border: 3px solid #9b45f7;
+        }
+
+        .cancel-modal-header {
+            background: linear-gradient(135deg, #8b6bff, #6947ff);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .cancel-modal-header i {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: pulse 1s infinite;
+        }
+
+        .cancel-modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .cancel-modal-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .booking-info {
+            background: #f5f0ff;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 600;
+            color: #6d28d9;
+            border: 2px solid #9b45f7;
+            margin: 20px 0;
+        }
+
+        .warning-text {
+            color: #7547ff;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .cancel-modal-footer {
+            padding: 20px 30px 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .cancel-modal-footer form {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .btn-cancel-modal {
+            flex: 1;
+            padding: 15px 0;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #a66bff, #8447ff);
+            color: white;
+            box-shadow: 0 5px 15px rgba(117, 71, 255, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(132, 71, 255, 0.6);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Бейдж роли пользователя */
+        .role-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .role-client {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .role-master {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .role-admin {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {# Всплывающие сообщения #}
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas
+                        {% if message.tags == 'success' %}fa-check-circle
+                        {% elif message.tags == 'error' %}fa-exclamation-circle
+                        {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                        {% else %}fa-info-circle{% endif %}
+                    "></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# Шапка профиля #}
+    <div class="profile-header">
+        {# Имя пользователя (логин) #}
+        <div class="profile-name">{{ user.username }}</div>
+        {# Бейдж роли (Клиент / Мастер / Администратор) #}
+        <div class="profile-role">
+            <span class="role-badge role-{{ user.role }}">
+                {{ user.get_role_display }}
+            </span>
+        </div>
+        {# Email пользователя #}
+        <div class="profile-email">{{ user.email }}</div>
+        {# Блок статистики (предстоящие, прошедшие, всего записей) #}
+        <div class="profile-stats">
+            <div class="stat-item">
+                <div class="stat-number">{{ upcoming_bookings.count }}</div>
+                <div class="stat-label">Предстоящие</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ past_bookings.count }}</div>
+                <div class="stat-label">Прошедшие</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ bookings_count }}</div>
+                <div class="stat-label">Всего записей</div>
+            </div>
+        </div>
+        {# Кнопки действий: редактировать профиль и сменить пароль #}
+        <div class="profile-actions" style="margin-top: 25px; display: flex; gap: 15px; justify-content: center;">
+            <a href="{% url 'mainapp:edit_profile' %}" class="btn-primary" style="padding: 10px 25px;">
+                <i class="fas fa-user-edit"></i> Редактировать профиль
+            </a>
+            <a href="{% url 'mainapp:change_password' %}" class="btn-primary"
+               style="background: #6d28d9; padding: 10px 25px;">
+                <i class="fas fa-key"></i> Сменить пароль
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        {# Предстоящие записи #}
+        <h2 class="section-title">Предстоящие записи</h2>
+
+        {# Если есть предстоящие записи – выводим их сеткой #}
+        {% if upcoming_bookings %}
+            <div class="bookings-grid">
+                {% for booking in upcoming_bookings %}
+                    <div class="booking-card upcoming">
+                        <div class="booking-service">{{ booking.service.title }}</div>
+                        <div class="booking-details">
+                            <i class="fas fa-calendar"></i> {{ booking.date|date:"d.m.Y" }}<br>
+                            <i class="fas fa-clock"></i> {{ booking.time|time:"H:i" }}<br>
+                            <i class="fas fa-phone"></i> {{ booking.phone }}<br>
+                            <i class="fas fa-user"></i> {{ booking.name }}
+                        </div>
+                        <div>
+                            <span class="booking-status status-upcoming">Предстоит</span>
+                        </div>
+                        {# Кнопка отмены записи #}
+                        <button type="button" class="btn-cancel"
+                                onclick="openCancelModal({{ booking.id }}, '{{ booking.service.title|escapejs }}', '{{ booking.date|date:"d.m.Y" }}')">
+                            <i class="fas fa-times"></i> Отменить
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            {# Если предстоящих записей нет – показываем заглушку #}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <p>У вас пока нет предстоящих записей</p>
+                <a href="{% url 'mainapp:services' %}" class="btn-primary">Записаться</a>
+            </div>
+        {% endif %}
+
+        {# история записей #}
+        <h2 class="section-title">История записей</h2>
+
+        {% if past_bookings %}
+            <div class="bookings-grid">
+                {% for booking in past_bookings %}
+                    <div class="booking-card past">
+                        <div class="booking-service">{{ booking.service.title }}</div>
+                        <div class="booking-details">
+                            <i class="fas fa-calendar"></i> {{ booking.date|date:"d.m.Y" }}<br>
+                            <i class="fas fa-clock"></i> {{ booking.time|time:"H:i" }}<br>
+                            <i class="fas fa-phone"></i> {{ booking.phone }}<br>
+                            <i class="fas fa-user"></i> {{ booking.name }}
+                        </div>
+                        <div>
+                            <span class="booking-status status-past">Завершено</span>
+                        </div>
+                        <div class="booking-actions">
+                            {# Если на эту запись ещё нет отзыва – показываем кнопку "Оставить отзыв" #}
+                            {% if not booking.review %}
+                                <a href="{% url 'mainapp:add_review' booking.id %}" class="btn-review">
+                                    <i class="fas fa-star"></i> Оставить отзыв
+                                </a>
+                            {% else %}
+                                {# Если отзыв уже есть #}
+                                <span class="review-given">
+                                    <i class="fas fa-check-circle"></i> Отзыв оставлен
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-history"></i>
+                <p>История записей пуста</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {# окно подтверждения отмены записи #}
+    <div id="cancelModal" class="cancel-modal">
+        <div class="cancel-modal-content">
+            <div class="cancel-modal-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Подтверждение отмены</h3>
+            </div>
+            <div class="cancel-modal-body">
+                <p>Вы уверены, что хотите отменить запись?</p>
+                <p class="booking-info" id="cancelBookingInfo"></p>
+                <p class="warning-text">Это действие нельзя будет отменить!</p>
+            </div>
+            <div class="cancel-modal-footer">
+                <form method="POST" id="cancelForm">
+                    {% csrf_token %}
+                    <button type="button" class="btn-cancel-modal btn-secondary" onclick="closeCancelModal()">
+                        <i class="fas fa-times"></i> Нет, оставить
+                    </button>
+                    <button type="submit" class="btn-cancel-modal btn-danger">
+                        <i class="fas fa-check"></i> Да, отменить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Скрипты #}
+    <script>
+        // Переменная для хранения ID записи, которую собираемся отменить
+        let currentBookingId = null;
+
+        // Функция открытия окна подтверждения. Вызывается из кнопки "Отменить" в карточке записи.
+        function openCancelModal(bookingId, serviceTitle, bookingDate) {
+            currentBookingId = bookingId;
+
+            // Заполняем информационный блок внутри формы: название услуги и дата
+            document.getElementById('cancelBookingInfo').innerHTML =
+                `<i class="fas fa-cut"></i> ${serviceTitle}<br>
+                 <i class="fas fa-calendar"></i> ${bookingDate}`;
+
+            // Устанавливаем ссылка формы: /cancel-booking/<id>/
+            document.getElementById('cancelForm').action = `/cancel-booking/${bookingId}/`;
+
+            // запретить прокрутку фона
+            document.getElementById('cancelModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Закрытие формы
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+            document.body.style.overflow = 'auto';   // возвращаем прокрутку
+        }
+
+        // Закрытие по клику на тёмный фон
+        window.onclick = function (event) {
+            const modal = document.getElementById('cancelModal');
+            if (event.target === modal) {
+                closeCancelModal();
+            }
+        }
+
+        // Закрытие по клавише Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeCancelModal();
+            }
+        });
+    </script>
+{% endblock %}

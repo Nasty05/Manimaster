@@ -1,0 +1,394 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block title %}Управление пользователями - ManiMaster{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        /* Общий фон страницы */
+        body {
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 150%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* Контейнер основной */
+        .admin-container {
+            max-width: 1400px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        /* Шапка панели администратора */
+        .admin-header {
+            background: linear-gradient(135deg, #6d28d9, #9b45f7);
+            border-radius: 40px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(155, 69, 247, 0.3);
+        }
+
+        .admin-title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .admin-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        /* Сетка статистики */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(155, 69, 247, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(155, 69, 247, 0.25);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: #9b45f7;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #6d28d9;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        /* Секция фильтров */
+        .filters-section {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(155, 69, 247, 0.15);
+        }
+
+        .filters-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            color: #6d28d9;
+            margin-bottom: 5px;
+        }
+
+        .filter-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e0d0ff;
+            border-radius: 15px;
+            font-size: 1rem;
+        }
+
+        /* Кнопка применения фильтра */
+        .btn-filter {
+            background: linear-gradient(135deg, #9b45f7, #6d28d9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 69, 247, 0.4);
+        }
+
+        /* Таблица пользователей */
+        .users-table-container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(155, 69, 247, 0.15);
+            overflow-x: auto;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th {
+            text-align: left;
+            padding: 15px;
+            background: #f0e4ff;
+            color: #6d28d9;
+            font-weight: 700;
+        }
+
+        .users-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0e4ff;
+        }
+
+        .users-table tr:hover {
+            background: #faf5ff;
+        }
+
+        /* Бейдж роли */
+        .role-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .role-client {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .role-master {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .role-admin {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        /* Кнопка изменить роль */
+        .btn-edit {
+            background: #4caf50;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Пагинация */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination-btn {
+            padding: 10px 15px;
+            border: 2px solid #9b45f7;
+            border-radius: 10px;
+            color: #9b45f7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn.active {
+            background: #9b45f7;
+            color: white;
+        }
+
+        .pagination-btn:hover {
+            background: #9b45f7;
+            color: white;
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 768px) {
+            .filters-form {
+                flex-direction: column;
+            }
+
+            .users-table th, .users-table td {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {# Основной контейнер панели администратора #}
+    <div class="admin-container">
+        {# Шапка с заголовком и общей статистикой #}
+        <div class="admin-header">
+            <h1 class="admin-title">⚙️ Управление пользователями</h1>
+            <p class="admin-subtitle">Всего пользователей: {{ stats.total }} | Клиентов: {{ stats.clients }} |
+                Мастеров: {{ stats.masters }} | Админов: {{ stats.admins }}</p>
+        </div>
+
+        {# Карточки со статистикой #}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number">{{ stats.total }}</div>
+                <div class="stat-label">Всего пользователей</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👤</div>
+                <div class="stat-number">{{ stats.clients }}</div>
+                <div class="stat-label">Клиентов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👩‍🎨</div>
+                <div class="stat-number">{{ stats.masters }}</div>
+                <div class="stat-label">Мастеров</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👑</div>
+                <div class="stat-number">{{ stats.admins }}</div>
+                <div class="stat-label">Администраторов</div>
+            </div>
+        </div>
+
+        {# Секция фильтров #}
+        <div class="filters-section">
+            <form method="get" class="filters-form">
+                {# Фильтр по роли #}
+                <div class="filter-group">
+                    <label for="role">Фильтр по роли</label>
+                    <select name="role" id="role" class="filter-control">
+                        <option value="">Все роли</option>
+                        {% for value, label in role_choices %}
+                            <option value="{{ value }}"
+                                    {% if current_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# Поиск по #}
+                <div class="filter-group">
+                    <label for="search">Поиск</label>
+                    <input type="text" name="search" id="search" class="filter-control"
+                           placeholder="Имя, email, телефон..." value="{{ search_query }}">
+                </div>
+
+                <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Применить</button>
+                <a href="{% url 'mainapp:admin_panel' %}" class="btn-filter"
+                   style="background: #666; text-decoration: none; text-align: center;">
+                    <i class="fas fa-times"></i> Сбросить
+                </a>
+            </form>
+        </div>
+
+        {# Таблица со списком пользователей #}
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя пользователя</th>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Email</th>
+                    <th>Телефон</th>
+                    <th>Роль</th>
+                    <th>Дата регистрации</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                {# Перебирает всех пользователей #}
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td><strong>{{ user.username }}</strong></td>
+                        <td>{{ user.name|default:"—" }}</td>
+                        <td>{{ user.surname|default:"—" }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone_number|default:"—" }}</td>
+                        <td>
+                            {# Бейдж роли #}
+                            <span class="role-badge role-{{ user.role }}">
+                                    {{ user.get_role_display }}
+                                </span>
+                        </td>
+                        <td>{{ user.date_joined|date:"d.m.Y" }}</td>
+                        <td>
+                            {# Ссылка на страницу изменения роли #}
+                            <a href="{% url 'mainapp:change_user_role' user.id %}" class="btn-edit">
+                                <i class="fas fa-edit"></i> Изменить роль
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    {# Если список пуст заглушка #}
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-users"
+                               style="font-size: 3rem; color: #9b45f7; margin-bottom: 10px; display: block;"></i>
+                            Пользователи не найдены
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# Пагинация #}
+        {% if users.paginator.num_pages > 1 %}
+            <div class="pagination">
+                {% if users.has_previous %}
+                    {# Кнопка первая страница #}
+                    <a href="?page=1{% if current_filter %}&role={{ current_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
+                       class="pagination-btn">«</a>
+                    {# Кнопка предыдущая страница #}
+                    <a href="?page=
+                            {{ users.previous_page_number }}{% if current_filter %}&role={{ current_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
+                       class="pagination-btn">‹</a>
+                {% endif %}
+
+                {# Текущая страница #}
+                <span class="pagination-btn active">{{ users.number }}</span>
+
+                {% if users.has_next %}
+                    {# Кнопка следующая страница #}
+                    <a href="?page=
+                            {{ users.next_page_number }}{% if current_filter %}&role={{ current_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
+                       class="pagination-btn">›</a>
+                    {# Кнопка последняя страница #}
+                    <a href="?page=
+                            {{ users.paginator.num_pages }}{% if current_filter %}&role={{ current_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
+                       class="pagination-btn">»</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,740 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}Управление расписанием - ManiMaster{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        /* Фон страницы */
+        body {
+            background: linear-gradient(135deg, #f1eaff, #9b45f7 150%);
+            background-attachment: fixed;
+        }
+
+        /* Контейнер для всего содержимого */
+        .schedule-container {
+            max-width: 1400px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        /* Шапка страницы */
+        .page-header {
+            background: linear-gradient(135deg, #6d28d9, #9b45f7);
+            border-radius: 30px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(155, 69, 247, 0.3);
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Сетка карточек */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Карточка формы */
+        .schedule-card {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(155, 69, 247, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #6d28d9;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Элементы форм */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #f0e4ff;
+            border-radius: 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #9b45f7;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(155, 69, 247, 0.1);
+        }
+
+        /* Кнопки */
+        .btn {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9b45f7, #6d28d9);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 69, 247, 0.4);
+        }
+
+        .btn-delete {
+            background: #8b6bff;
+            color: white;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            border-radius: 50px;
+        }
+
+        .btn-delete:hover {
+            background: #5e52ff;
+            transform: translateY(-2px);
+        }
+
+        /* Список элементов */
+        .items-list {
+            margin-top: 20px;
+        }
+
+        .item-row {
+            background: #faf5ff;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #6d28d9;
+        }
+
+        .item-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Чекбоксы */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+
+        /* Стили для полей времени */
+        input[type="time"] {
+            cursor: pointer;
+            background: white;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        input[type="time"]:hover {
+            border-color: #9b45f7;
+        }
+
+        input[type="time"]:focus {
+            outline: none;
+            border-color: #9b45f7;
+            box-shadow: 0 0 0 3px rgba(155, 69, 247, 0.1);
+        }
+
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+            filter: invert(0.5);
+        }
+
+        input[type="time"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+        /* Предпросмотр расписания на неделю */
+        .preview-section {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .preview-grid {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .preview-day {
+            flex: 1;
+            background: #faf5ff;
+            border-radius: 20px;
+            padding: 20px 10px;
+            text-align: center;
+            border: 2px solid #f0e4ff;
+            transition: all 0.3s ease;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .preview-day:hover {
+            border-color: #9b45f7;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(155, 69, 247, 0.15);
+        }
+
+        .preview-day-name {
+            font-weight: 800;
+            color: #6d28d9;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .preview-time {
+            font-size: 1rem;
+            color: #6d28d9;
+            background: #e6d5ff;
+            padding: 6px 10px;
+            border-radius: 30px;
+            margin: 3px 0;
+            font-weight: 600;
+        }
+
+        .preview-duration {
+            font-size: 0.9rem;
+            color: #9b45f7;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .preview-off {
+            color: #8b6bff;
+            font-size: 1rem;
+            background: #f4f0ff;
+            padding: 10px;
+            border-radius: 30px;
+            border: 2px dashed #7f6bff;
+            font-weight: 600;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .preview-day-name {
+                font-size: 1rem;
+            }
+
+            .preview-time {
+                font-size: 0.9rem;
+                padding: 4px 8px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .preview-grid {
+                gap: 10px;
+            }
+
+            .preview-day {
+                padding: 15px 5px;
+                min-height: 130px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .preview-grid {
+                gap: 5px;
+            }
+
+            .preview-day {
+                padding: 12px 3px;
+                min-height: 110px;
+            }
+
+            .preview-day-name {
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+
+            .preview-time {
+                font-size: 0.8rem;
+                padding: 3px 5px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {# Основной контейнер страницы #}
+    <div class="schedule-container">
+        {# Шапка страницы #}
+        <div class="page-header">
+            <h1>📅 Управление расписанием</h1>
+            <p>Настройте свое рабочее время, перерывы и исключения</p>
+        </div>
+
+        {# Сетка из трёх карточек #}
+        <div class="schedule-grid">
+            <!-- Регулярное расписание -->
+            <div class="schedule-card">
+                <h2 class="card-title">
+                    <i class="fas fa-calendar-week"></i>
+                    Регулярное расписание
+                </h2>
+
+                {# Форма добавления расписания #}
+                <form method="POST" action="{% url 'mainapp:master_schedule' %}">
+                    {% csrf_token %} {# защита от CSRF атак #}
+                    <input type="hidden" name="action" value="add_schedule">
+
+                    <div class="form-group"> {# выбор дня недели из списка #}
+                        <label>День недели</label>
+                        <select name="day_of_week" required>
+                            <option value="">Выберите день</option>
+                            {% for value, name in weekdays %}
+                                <option value="{{ value }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Начало работы</label>
+                        <input type="time" name="start_time" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Конец работы</label>
+                        <input type="time" name="end_time" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Длительность слота (минут)</label>
+                        <input type="number" name="slot_duration" value="60" min="30" step="30" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Добавить расписание</button>
+                </form>
+
+                {# Список уже добавленных регулярных расписаний #}
+                <div class="items-list">
+                    {% for schedule in regular_schedule %}
+                        <div class="item-row">
+                            <div class="item-info"> {# превращает в название дня #}
+                                <div class="item-title">{{ schedule.get_day_of_week_display }}</div>
+                                <div class="item-details">
+                                    {{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}
+                                    (слот {{ schedule.slot_duration }} мин)
+                                </div>
+                            </div>
+                            {# форма удаления расписания #}
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_schedule">
+                                <input type="hidden" name="schedule_id" value="{{ schedule.id }}">
+                                <button type="submit" class="btn btn-delete"
+                                        onclick="return confirm('Удалить это расписание?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    {% empty %}
+                        {# при пустом списке показывается #}
+                        <p style="color: #999; text-align: center;">Нет регулярного расписания</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- регулярные перерывы -->
+            <div class="schedule-card">
+                <h2 class="card-title">
+                    <i class="fas fa-coffee"></i>
+                    Регулярные перерывы
+                </h2>
+                <p style="margin-bottom: 20px; color: #666; font-size: 0.9rem;">
+                    Перерывы будут автоматически применяться каждую неделю в указанные дни
+                </p>
+
+                {# Форма добавления перерыва #}
+                <form method="POST" action="{% url 'mainapp:master_schedule' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_weekly_timeoff">
+
+                    <div class="form-group">
+                        <label>День недели</label>
+                        <select name="day_of_week" required>
+                            <option value="">Выберите день</option>
+                            {% for value, name in weekdays %}
+                                <option value="{{ value }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Начало перерыва</label>
+                        <input type="time" name="start_time" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Конец перерыва</label>
+                        <input type="time" name="end_time" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Причина</label>
+                        <input type="text" name="reason" value="Обед" placeholder="например: Обед, Технический перерыв">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Добавить регулярный перерыв</button>
+                </form>
+
+                {# Список уже добавленных перерывов #}
+                <div class="items-list">
+                    <h3 style="font-size: 1.2rem; color: #6d28d9; margin-bottom: 15px;">Текущие перерывы</h3>
+                    {% for timeoff in weekly_time_offs %}
+                        <div class="item-row">
+                            <div class="item-info">
+                                <div class="item-title">{{ timeoff.get_day_of_week_display }}</div>
+                                <div class="item-details">
+                                    {{ timeoff.start_time|time:"H:i" }} - {{ timeoff.end_time|time:"H:i" }}
+                                    {% if timeoff.reason %}({{ timeoff.reason }}){% endif %}
+                                </div>
+                            </div>
+                            {# форма удаления перерыва #}
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_weekly_timeoff">
+                                <input type="hidden" name="timeoff_id" value="{{ timeoff.id }}">
+                                <button type="submit" class="btn btn-delete"
+                                        onclick="return confirm('Удалить этот перерыв?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    {% empty %}
+                        <p style="color: #999; text-align: center; padding: 20px;">
+                            Нет регулярных перерывов. Добавьте первый!
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Исключения -->
+            <div class="schedule-card">
+                <h2 class="card-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Исключения
+                </h2>
+                <p style="margin-bottom: 20px; color: #666; font-size: 0.9rem;">
+                    Здесь можно указать особые дни: отпуск, больничный или работу в другое время
+                </p>
+
+                {# Форма добавления исключения #}
+                <form method="POST" action="{% url 'mainapp:master_schedule' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_exception">
+
+                    {# Дата исключения #}
+                    <div class="form-group">
+                        <label>Дата</label>
+                        <input type="date" name="date" min="{{ today }}" required>
+                    </div>
+
+                    {# Кнопки для выбора типа исключения #}
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 600;">
+                            Выберите тип исключения:
+                        </label>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="exception_type" value="not_working" checked>
+                                <span>❌ Не работаю</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="exception_type" value="different_time">
+                                <span>🕐 Работаю в другое время</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="exception_type" value="regular">
+                                <span>📅 По обычному расписанию</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {# Блок для указания другого времени #}
+                    <div id="different-time-fields" style="display: none;">
+                        <div class="form-group">
+                            <label>Начало работы</label>
+                            <input type="time" name="start_time">
+                        </div>
+                        <div class="form-group">
+                            <label>Конец работы</label>
+                            <input type="time" name="end_time">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="use_special_breaks" id="use_special_breaks">
+                                Указать специальные перерывы для этого дня
+                            </label>
+                        </div>
+                        {# Блок специальных перерывов #}
+                        <div id="special-breaks-fields"
+                             style="display: none; margin-top: 15px; padding: 15px; background: #f5f0ff; border-radius: 15px;">
+                            <h4 style="color: #6d28d9; margin-bottom: 15px;">Перерывы на этот день</h4>
+                            <div class="form-group">
+                                <label>Начало перерыва</label>
+                                <input type="time" name="break_start">
+                            </div>
+                            <div class="form-group">
+                                <label>Конец перерыва</label>
+                                <input type="time" name="break_end">
+                            </div>
+                            <div class="form-group">
+                                <label>Причина перерыва</label>
+                                <input type="text" name="break_reason" placeholder="Например: обед">
+                            </div>
+                        </div>
+                    </div>
+                    {# Причина исключения #}
+                    <div class="form-group">
+                        <label>Причина исключения</label>
+                        <input type="text" name="reason" placeholder="Например: отпуск, отгул, праздник">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Сохранить исключение</button>
+                </form>
+
+                {# Список уже добавленных исключений #}
+                <div class="items-list">
+                    <h3 style="font-size: 1.2rem; color: #6d28d9; margin-bottom: 15px;">Текущие исключения</h3>
+                    {% for exception in exceptions %}
+                        <div class="item-row">
+                            <div class="item-info">
+                                <div class="item-title">{{ exception.date|date:"d.m.Y" }}</div>
+                                <div class="item-details">
+                                    {# Условное отображение типа исключения #}
+                                    {% if not exception.is_working %}
+                                        ❌ НЕ РАБОТАЮ
+                                    {% elif exception.start_time and exception.end_time %}
+                                        🕐 {{ exception.start_time|time:"H:i" }} - {{ exception.end_time|time:"H:i" }}
+                                    {% else %}
+                                        📅 По обычному расписанию
+                                    {% endif %}
+                                    {% if exception.reason %}({{ exception.reason }}){% endif %}
+                                </div>
+                            </div>
+                            {# форма удаления исключения #}
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_exception">
+                                <input type="hidden" name="exception_id" value="{{ exception.id }}">
+                                <button type="submit" class="btn btn-delete"
+                                        onclick="return confirm('Удалить это исключение?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    {% empty %}
+                        <p style="color: #999; text-align: center;">Нет исключений</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# предпросмотр недели #}
+        <div class="schedule-card preview-section">
+            <h2 class="card-title">
+                <i class="fas fa-calendar-alt"></i>
+                Предпросмотр недели
+            </h2>
+            <div class="preview-grid">
+                {# Перебираем дни недели #}
+                {% for day_num, day_name in weekdays %}
+                    <div class="preview-day">
+                        <div class="preview-day-name">{{ day_name }}</div>
+                        {# Ищем запись с этим днём #}
+                        {% for s in regular_schedule %}
+                            {% if s.day_of_week == day_num %}
+                                <div class="preview-time">{{ s.start_time|time:"H:i" }}</div>
+                                <div class="preview-time">{{ s.end_time|time:"H:i" }}</div>
+                                <div class="preview-duration">{{ s.slot_duration }} мин</div>
+                            {% endif %}
+                        {% empty %}
+                            {# если нету то выходной отображает #}
+                            <div class="preview-off">Выходной</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    {# Скрипты #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Элементы формы исключений
+            const exceptionRadios = document.querySelectorAll('input[name="exception_type"]');
+            const differentTimeFields = document.getElementById('different-time-fields');
+            const useSpecialBreaks = document.getElementById('use_special_breaks');
+            const specialBreaksFields = document.getElementById('special-breaks-fields');
+            const exceptionStartTime = document.querySelector('#different-time-fields input[name="start_time"]');
+            const exceptionEndTime = document.querySelector('#different-time-fields input[name="end_time"]');
+            const breakStartInput = document.querySelector('input[name="break_start"]');
+            const breakEndInput = document.querySelector('input[name="break_end"]');
+            const breakReasonInput = document.querySelector('input[name="break_reason"]');
+
+            // Показывает/скрывает блок "Работаю в другое время" в зависимости от выбранной кнопки
+            function updateExceptionFields() {
+                const selectedType = document.querySelector('input[name="exception_type"]:checked')?.value;
+                if (!selectedType) return;
+
+                if (selectedType === 'different_time') {
+                    // показывает блок с полями работы
+                    differentTimeFields.style.display = 'block';
+                    // делает поля обязательными и доступными
+                    if (exceptionStartTime) {
+                        exceptionStartTime.required = true;
+                        exceptionStartTime.disabled = false;
+                    }
+                    if (exceptionEndTime) {
+                        exceptionEndTime.required = true;
+                        exceptionEndTime.disabled = false;
+                    }
+                    // разблокирует чекбокс специальных перерывов
+                    if (useSpecialBreaks) {
+                        useSpecialBreaks.disabled = false;
+                    }
+                } else {
+                    // скрываем болок
+                    differentTimeFields.style.display = 'none';
+                    if (exceptionStartTime) {
+                        exceptionStartTime.required = false;
+                        exceptionStartTime.disabled = true;
+                        exceptionStartTime.value = ''; // очищаем значение
+                    }
+                    if (exceptionEndTime) {
+                        exceptionEndTime.required = false;
+                        exceptionEndTime.disabled = true;
+                        exceptionEndTime.value = '';
+                    }
+                    if (useSpecialBreaks) {
+                        useSpecialBreaks.disabled = true;
+                        useSpecialBreaks.checked = false;
+                    } //снимаем отметку
+                    if (specialBreaksFields) {
+                        specialBreaksFields.style.display = 'none';
+                    } //скрываем блок специальных перерывов
+                }
+            }
+
+            // Показывает или скрывает блок специальных перерывов при чекбоксе
+            function updateSpecialBreaksFields() {
+                if (useSpecialBreaks && useSpecialBreaks.checked) { // если чекбокс нажат то блок видно он обязательный
+                    specialBreaksFields.style.display = 'block';
+                    if (breakStartInput) {
+                        breakStartInput.required = true;
+                        breakStartInput.disabled = false;
+                    }
+                    if (breakEndInput) {
+                        breakEndInput.required = true;
+                        breakEndInput.disabled = false;
+                    }
+                    if (breakReasonInput) {
+                        breakReasonInput.disabled = false;
+                    }
+                } else {
+                    // скрывает блок и отключаем поля
+                    specialBreaksFields.style.display = 'none';
+                    if (breakStartInput) {
+                        breakStartInput.required = false;
+                        breakStartInput.disabled = true;
+                        breakStartInput.value = '';
+                    }
+                    if (breakEndInput) {
+                        breakEndInput.required = false;
+                        breakEndInput.disabled = true;
+                        breakEndInput.value = '';
+                    }
+                    if (breakReasonInput) {
+                        breakReasonInput.disabled = true;
+                        breakReasonInput.value = '';
+                    }
+                }
+            }
+
+            // Навешиваем обработчики на кнопки
+            exceptionRadios.forEach(radio => {
+                radio.addEventListener('change', updateExceptionFields);
+            });
+
+            // Обработчик чекбокса специальных перерывов
+            if (useSpecialBreaks) {
+                useSpecialBreaks.addEventListener('change', updateSpecialBreaksFields);
+                useSpecialBreaks.disabled = true; // изначально выключен
+            }
+
+            // вызывает функции 1 раз при загрузке
+            updateExceptionFields();
+            updateSpecialBreaksFields();
+        });
+
+        // подтверждение удаления
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    if (!confirm('Вы уверены, что хотите удалить?')) {
+                        e.preventDefault(); // если отмена то отменяет отправку формы
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
